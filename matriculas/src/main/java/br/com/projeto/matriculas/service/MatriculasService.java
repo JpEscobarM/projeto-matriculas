@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -205,7 +206,77 @@ public class MatriculasService {
 	    return ordenado;
 	}
 	
-	//POR ESTADO-
+	//RANKING DE CURSOS EM 2022 ( 10 CURSOS COM MAIOR NUMERO DE MATRICULAS NO BRASIL)
+	//POR ESTADO
+	public Map<String, Integer> listaRanking2022PorEstado(String estado) {
+	    Map<String, Integer> mapCursos = new LinkedHashMap<>();
+
+	    for (String c : cursos) {
+	        mapCursos.put(c, 0);
+	    }
+
+	    for (Matricula m : matriculaRepository.listaMatriculas()) {
+	    	
+	    	if( m.getEstado()!= null && m.getEstado().equalsIgnoreCase(estado))
+	    	{
+	    		String curso = m.getNomeDoCurso();
+		        int soma = mapCursos.getOrDefault(curso, 0) + verificaValor(m.getMatriculas2022());
+		        mapCursos.put(curso, soma);
+	    	}
+	        
+	    }
+
+	
+	    Map<String, Integer> ordenado = mapCursos.entrySet()
+	        .stream()
+	        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+	        .limit(10)
+	        .collect(Collectors.toMap(
+	            Map.Entry::getKey,
+	            Map.Entry::getValue,
+	            (e1, e2) -> e1,
+	            LinkedHashMap::new
+	        ));
+
+	    return ordenado;
+	}
+	
+	//RANKING DE CURSOS EM 2022 ( 10 CURSOS COM MAIOR NUMERO DE MATRICULAS NO BRASIL)
+	//POR ESTADO E MODALIDADE
+		public Map<String, Integer> listaRanking2022PorEstado(String estado,String modalidade) {
+		    Map<String, Integer> mapCursos = new LinkedHashMap<>();
+
+		    for (String c : cursos) {
+		        mapCursos.put(c, 0);
+		    }
+
+		    for (Matricula m : matriculaRepository.listaMatriculas()) {
+		    	
+		    	if( m.getEstado()!= null && m.getEstado().equalsIgnoreCase(estado) && m.getModalidade().equalsIgnoreCase(modalidade))
+		    	{
+		    		String curso = m.getNomeDoCurso();
+			        int soma = mapCursos.getOrDefault(curso, 0) + verificaValor(m.getMatriculas2022());
+			        mapCursos.put(curso, soma);
+		    	}
+		        
+		    }
+
+		
+		    Map<String, Integer> ordenado = mapCursos.entrySet()
+		        .stream()
+		        .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+		        .limit(10)
+		        .collect(Collectors.toMap(
+		            Map.Entry::getKey,
+		            Map.Entry::getValue,
+		            (e1, e2) -> e1,
+		            LinkedHashMap::new
+		        ));
+
+		    return ordenado;
+		}
+	
+	
 	public Map<Integer, Integer> totalPorEstado(String estado) {
 		
 		List<Integer> anos = Arrays.asList(2014,2015,2016,2017,2018,2019,2020,2021,2022);
@@ -294,5 +365,57 @@ public class MatriculasService {
 		
 		return totalPorAno;
 	}
+	
+	public List<Integer> gerarAnos()
+	{
+		List<Integer> anos = new LinkedList<Integer>();
+		
+	
+		for(int i = 2014; i < 2022;i++) {
+			anos.add(i);
+		}
+		return anos;
+	}
+	
+	public Map<Integer,Integer> totalPorEstadoModalidade(String estado, String modalidade) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
+	{
+		
+	List<Integer> anos = gerarAnos();
+		
+	Map<Integer,Integer> totalPorAnoEstadoModalidade = new HashMap<Integer,Integer>();
+	
+	for(Integer i : anos)
+	{
+		totalPorAnoEstadoModalidade.put(i, 0);
+	}
+	
+	for(Matricula m : matriculaRepository.listaMatriculas())
+	{
+		if(m.getModalidade().equalsIgnoreCase(modalidade) && m.getEstado().equalsIgnoreCase(estado))
+		{
+			for(int i = 2014; i < 2023 ; i ++)
+			{
+				
+				try {
+					Method metodo;
+					metodo = Matricula.class.getMethod("getMatriculas"+i);
+					Integer valor = (Integer) metodo.invoke(m);
+					totalPorAnoEstadoModalidade.put(i, 
+				   totalPorAnoEstadoModalidade.getOrDefault(i, 0)+ verificaValor(valor));
+				} catch (NoSuchMethodException | SecurityException e) {
+					
+					e.printStackTrace();
+				}
+				
+				
+			
+			}
+		}
+		
+	}
+		
+		return totalPorAnoEstadoModalidade;
+	}
+	
 	
 }

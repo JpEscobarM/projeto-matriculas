@@ -1,5 +1,6 @@
 package br.com.projeto.matriculas.controller;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,10 +60,43 @@ public class MatriculaController {
 	
 	//Total de alunos matriculados (no Brasil) por ANO e ESTADO
 	@GetMapping("matriculas/total-por-estado")
-	public Map<Integer,Integer> totalMatriculadosPorEstado(@RequestParam String estado)
+	public Map<Integer,Integer> totalMatriculadosPorEstado(@RequestParam String estado,@RequestParam(required = false) String modalidade
+			) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
 		
-		return ms.totalPorEstado(estado);
+		if(modalidade != null && estado != null)
+		{
+
+			//Total de alunos matriculados (no Brasil) por ano,
+			//com a possibilidade de escolher a modalidade (EaD ou Presencial)
+			
+			return ms.totalPorEstadoModalidade(estado,modalidade);
+		}
+		else
+		{
+			return ms.totalPorEstado(estado);
+		}
+	
 	}
+	
+	
+	//Ranking de cursos em 2022 (10 cursos com maior número de matrículas no Brasil)
+	//COM FILTRO PARA ESTADO
+	@GetMapping("matriculas/ranking2022PorEstado")
+	public Map<String,Integer> rankingTop10de2022PorEstado(@RequestParam String estado,@RequestParam(required = false) String modalidade)
+	{
+	
+		if(modalidade != null)
+		{
+			return  ms.listaRanking2022PorEstado(estado,modalidade);
+		}
+		else
+		{
+			return ms.listaRanking2022PorEstado(estado);
+		}
+	
+	}
+	
+
 	
 }
