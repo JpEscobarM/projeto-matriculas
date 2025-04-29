@@ -1,11 +1,13 @@
 package br.com.projeto.matriculas.controller;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,6 +16,7 @@ import br.com.projeto.matriculas.model.Matricula;
 import br.com.projeto.matriculas.service.MatriculasService;
 
 @RestController
+@CrossOrigin(origins = "*") //LIBERA ACESSO PRA TODOS 
 public class MatriculaController {
 	
 	@Autowired
@@ -97,6 +100,11 @@ public class MatriculaController {
 	
 	}
 	
+	@GetMapping("matriculas/estados")
+	public List<String> listaEstados()
+	{
+		return ms.getEstados();
+	}
 
 	
 }
