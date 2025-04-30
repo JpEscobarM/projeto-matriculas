@@ -1,4 +1,5 @@
 const divConteudo = document.querySelector('.div-mostra-conteudo');
+
 let divConteudoExibido = null;
 let formularioDeDados = null;
 let listaEstados = null;
@@ -6,8 +7,75 @@ let botaoBuscar = null;
 let selectEstado = null;
 let selectModalidade = null;
 let divResultadoBusca = null;
+let historicoRequisicoes = JSON.parse(localStorage.getItem('historicoRequisicoes')) || [];
+
+renderizaHistorico();
+
+function renderizaHistorico()
+{
+    let divHistorico = document.querySelector(".historico-requisicoes");
+
+    if(!divHistorico)
+    {
+        divHistorico = document.createElement("div");
+        divHistorico.classList.add("historico-requisicoes");
+        divConteudo.appendChild(divHistorico);
+    }
+
+    divHistorico.innerHTML = "<h3>Últimas Consultas:</h3>";
+
+   
+
+    historicoRequisicoes.forEach(req => {
+        
+        
+        const btnHistorico = document.createElement("button");
+       
+
+        btnHistorico.innerText = `${ req.tipo.toUpperCase()} | ${req.modalidade} | ${req.estado}`
+        
+        btnHistorico.classList.add("btn-historico");
+        
+        btnHistorico.addEventListener('click', async () => {
+            if (req.tipo === "ano") {
+                const map = await buscaTotalPorAno(req.modalidade, req.estado);
+                divResultadoBusca.innerHTML = "";
+                criaTabelaPorMap(map);
+            } else if (req.tipo === "ranking") {
+                const map = await buscaRanking(req.modalidade, req.estado);
+                divResultadoBusca.innerHTML = "";
+                criaTabelaPorMap(map);
+            }
+        });
+
+        divHistorico.appendChild(btnHistorico);
+
+    });
+
+  
+
+}
+
+function registraRequisicao(tipo,modalidade,estado){
+    const novaConsulta =    { tipo,modalidade,estado};
+
+    historicoRequisicoes = historicoRequisicoes.filter(
+        item => !(item.tipo === tipo && item.modalidade === modalidade && item.estado === estado)
+    );
+
+    historicoRequisicoes.unshift(novaConsulta);
 
 
+
+    if(historicoRequisicoes.length > 2 )
+    {
+        historicoRequisicoes.pop();
+    }
+
+    localStorage.setItem('historicoRequisicoes', JSON.stringify(historicoRequisicoes));
+
+    renderizaHistorico();
+}
 
 function removeElemento(elemento)
 {
@@ -34,7 +102,7 @@ async function criaSelects() {
     selectModalidade = document.createElement('select');
     selectModalidade.classList.add("select-modalidade");
 
-    selectModalidade.innerHTML = `<option value="ALL">Todas as modalidades</option>
+    selectModalidade.innerHTML = `<option value="SEM FILTRO">Todas as modalidades</option>
                                    <option value="EAD">EAD</option>
                                    <option value="PRESENCIAL">Presencial</option>
     `;
@@ -42,7 +110,7 @@ async function criaSelects() {
     selectEstado = document.createElement('select');
     selectEstado.classList.add("select-estado");
     
-    selectEstado.innerHTML = `<option value="ALL">Todos os Estados</option>
+    selectEstado.innerHTML = `<option value="SEM FILTRO">Todos os Estados</option>
     `;
 
     try{
@@ -63,17 +131,27 @@ async function criaSelects() {
 
 }
 
- function criaMatriculasPorAno(div) 
+ function criaDivResultado(div,tipo) 
 {
      
     div.appendChild(selectModalidade);
     div.appendChild(selectEstado);
 
-    
-    botaoBuscar = document.createElement("button");
-    botaoBuscar.classList.add("btn-buscar");
-    botaoBuscar.innerText="Buscar";
-    div.appendChild(botaoBuscar);
+    if(tipo === "btn-matriculas-por-ano")
+    {
+        botaoBuscar = document.createElement("button");
+        botaoBuscar.classList.add("btn-buscar-por-ano");
+        botaoBuscar.innerText="Buscar";
+        div.appendChild(botaoBuscar);
+    }
+    else
+    {
+        
+        botaoBuscar = document.createElement("button");
+        botaoBuscar.classList.add("btn-buscar-ranking");
+        botaoBuscar.innerText="Buscar";
+        div.appendChild(botaoBuscar);
+    }
 
     divResultadoBusca = document.createElement('div');
     divResultadoBusca.classList.add('resultado');
@@ -88,7 +166,7 @@ async function buscaTotalPorAno(param1,param2)
   
 
     //PARAM1 = MODALIDADE E PARAM2 = ESTADO
-    if(param1=== "ALL" && param2 ==="ALL")
+    if(param1=== "SEM FILTRO" && param2 ==="SEM FILTRO")
     {
         console.log("SEM FILTRO ");
         try{
@@ -103,7 +181,7 @@ async function buscaTotalPorAno(param1,param2)
             console.log("Erro ao puxar dados sem filtro",erro);
         }
     }
-    else if( param1 !== 'ALL' && param2 ==="ALL")
+    else if( param1 !== 'SEM FILTRO' && param2 ==="SEM FILTRO")
     {
         console.log("FILTRO DE MODALIDADE");
         try{    
@@ -119,7 +197,7 @@ async function buscaTotalPorAno(param1,param2)
             console.log("Erro ao puxar dados sem filtro",erro);
         }
     }
-    else if( param1 === 'ALL' && param2 !=="ALL")
+    else if( param1 === 'SEM FILTRO' && param2 !=="SEM FILTRO")
         {
             console.log("FILTRO DE ESTADO");
             try{    
@@ -135,7 +213,7 @@ async function buscaTotalPorAno(param1,param2)
                 console.log("Erro ao puxar dados sem filtro",erro);
             }
         }
-        else if( param1 !== 'ALL' && param2 !=="ALL")
+        else if( param1 !== 'SEM FILTRO' && param2 !=="SEM FILTRO")
             {
                 console.log("FITLRO DE MODALIDADE E ESTADO");
                 try{    
@@ -153,6 +231,74 @@ async function buscaTotalPorAno(param1,param2)
             }
 
 };
+
+
+async function buscaRanking(param1,param2) {
+     //PARAM1 = MODALIDADE E PARAM2 = ESTADO
+     if(param1=== "SEM FILTRO" && param2 ==="SEM FILTRO")
+        {
+            console.log("SEM FILTRO ");
+            try{
+                const response = await fetch('http://localhost:8080/matriculas/ranking2022');
+                const matriculasPorAno= await response.json();
+                const mapMatriculas = new Map(Object.entries(matriculasPorAno));
+    
+            return mapMatriculas;
+    
+            }catch(erro)
+            {
+                console.log("Erro ao puxar dados sem filtro",erro);
+            }
+        }
+        else if( param1 !== 'SEM FILTRO' && param2 ==="SEM FILTRO")
+        {
+            console.log("FILTRO DE MODALIDADE");
+            try{    
+    
+                const response = await fetch(`http://localhost:8080/matriculas/ranking2022?modalidade=${param1}`);
+                const matriculasPorAno= await response.json();
+                const mapMatriculas = new Map(Object.entries(matriculasPorAno));
+                
+            return mapMatriculas;
+    
+            }catch(erro)
+            {
+                console.log("Erro ao puxar dados sem filtro",erro);
+            }
+        }
+        else if( param1 === 'SEM FILTRO' && param2 !=="SEM FILTRO")
+            {
+                console.log("FILTRO DE ESTADO");
+                try{    
+        
+                    const response = await fetch(`http://localhost:8080/matriculas/ranking2022PorEstado?estado=${param2}`);
+                    const matriculasPorAno= await response.json();
+                    const mapMatriculas = new Map(Object.entries(matriculasPorAno));
+                    
+                return mapMatriculas;
+        
+                }catch(erro)
+                {
+                    console.log("Erro ao puxar dados sem filtro",erro);
+                }
+            }
+            else if( param1 !== 'SEM FILTRO' && param2 !=="SEM FILTRO")
+                {
+                    console.log("FITLRO DE MODALIDADE E ESTADO");
+                    try{    
+            
+                        const response = await fetch(`http://localhost:8080/matriculas/ranking2022PorEstado?estado=${param2}&modalidade=${param1}`);
+                        const matriculasPorAno= await response.json();
+                        const mapMatriculas = new Map(Object.entries(matriculasPorAno));
+                        
+                    return mapMatriculas;
+            
+                    }catch(erro)
+                    {
+                        console.log("Erro ao puxar dados sem filtro",erro);
+                    }
+                }
+}
 
 function criaTabelaPorMap(map)
 {
@@ -200,10 +346,10 @@ document.addEventListener('click', async function(event)
     {
       
       criaDiv(divConteudo);
-      criaMatriculasPorAno(divConteudoExibido);
+      criaDivResultado(divConteudoExibido,"btn-matriculas-por-ano");
 
     }
-    else if(elementoClick.classList.contains("btn-buscar"))
+    else if(elementoClick.classList.contains("btn-buscar-por-ano"))
     {
         console.log("Modalidade:", selectModalidade.value);
         console.log("Estado:", selectEstado.value);
@@ -213,7 +359,29 @@ document.addEventListener('click', async function(event)
       
        criaTabelaPorMap(map);
 
+        registraRequisicao("ano",selectModalidade.value,selectEstado.value);
+
+
     }
+    else if(elementoClick.classList.contains("btn-ranking"))
+    {
+        criaDiv(divConteudo);
+        criaDivResultado(divConteudoExibido,"btn-ranking");
+    }
+    else if(elementoClick.classList.contains("btn-buscar-ranking"))
+    {
+        console.log("Modalidade:", selectModalidade.value);
+        console.log("Estado:", selectEstado.value);
+        divResultadoBusca.innerHTML ='';
+
+        const map = await buscaRanking(selectModalidade.value,selectEstado.value);
+
+        criaTabelaPorMap(map);
+
+        registraRequisicao("ranking",selectModalidade.value,selectEstado.value);
+        
+    }
+
 
 }
 );
