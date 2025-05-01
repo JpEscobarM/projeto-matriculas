@@ -202,7 +202,7 @@ async function buscaTotalPorAno(param1,param2)
       
             try{    
     
-                const response = await fetch(`http://localhost:8080/matriculas/total-por-ano?estado=${param2}`);
+                const response = await fetch(`http://localhost:8080/matriculas/total-por-estado?estado=${param2}`);
                 const matriculasPorAno= await response.json();
                 const mapMatriculas = new Map(Object.entries(matriculasPorAno));
                 
