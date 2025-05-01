@@ -40,11 +40,11 @@ function renderizaHistorico()
             if (req.tipo === "ano") {
                 const map = await buscaTotalPorAno(req.modalidade, req.estado);
                 divResultadoBusca.innerHTML = "";
-                criaTabelaPorMap(map);
+                criaTabelaPorMap(map,"Ano");
             } else if (req.tipo === "ranking") {
                 const map = await buscaRanking(req.modalidade, req.estado);
                 divResultadoBusca.innerHTML = "";
-                criaTabelaPorMap(map);
+                criaTabelaPorMap(map,"Cursos");
             }
         });
 
@@ -300,14 +300,14 @@ async function buscaRanking(param1,param2) {
                 }
 }
 
-function criaTabelaPorMap(map)
+function criaTabelaPorMap(map,tipoDeBusca)
 {
 
     const table = document.createElement('table');
     table.classList.add('tabela-matriculas');
     const thead = document.createElement("thead");
     thead.innerHTML =`<tr>
-    <th>Ano</th>
+    <th>${tipoDeBusca}</th>
     <th>Total de Matrículas</th>
     </tr>
     `;
@@ -329,7 +329,7 @@ function criaTabelaPorMap(map)
 
    table.appendChild(tbody);
 
-   
+   divResultadoBusca.innerHTML ='';
 
     divResultadoBusca.appendChild(table);
 }
@@ -352,11 +352,11 @@ document.addEventListener('click', async function(event)
     else if(elementoClick.classList.contains("btn-buscar-por-ano"))
     {
       
-        divResultadoBusca.innerHTML ='';
+       //divResultadoBusca.innerHTML ='';
        const map = await buscaTotalPorAno(selectModalidade.value,selectEstado.value);
       
       
-       criaTabelaPorMap(map);
+       criaTabelaPorMap(map,"Ano");
 
         registraRequisicao("ano",selectModalidade.value,selectEstado.value);
 
@@ -370,11 +370,11 @@ document.addEventListener('click', async function(event)
     else if(elementoClick.classList.contains("btn-buscar-ranking"))
     {
   
-        divResultadoBusca.innerHTML ='';
+      //divResultadoBusca.innerHTML ='';
 
         const map = await buscaRanking(selectModalidade.value,selectEstado.value);
 
-        criaTabelaPorMap(map);
+        criaTabelaPorMap(map,"Cursos");
 
         registraRequisicao("ranking",selectModalidade.value,selectEstado.value);
         
