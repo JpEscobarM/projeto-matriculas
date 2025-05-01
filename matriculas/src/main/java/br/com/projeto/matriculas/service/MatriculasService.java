@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ public class MatriculasService {
 		estados = getEstados();
 	}
 	
+	@Cacheable("cursos")
 	public List<String> getCursos() {
 		
 		List<String> cursos = new LinkedList<>();
@@ -54,6 +56,7 @@ public class MatriculasService {
 	}
 	
 	
+	@Cacheable("estados")
 	public List<String> getEstados() {
 		
 		List<String> estados = new LinkedList<>();
@@ -90,7 +93,8 @@ public class MatriculasService {
 	public Page<Matricula> listaMatriculas(Pageable pageable) {
 		return matriculaRepository.listaMatriculas(pageable);
 	}
-
+	
+	@Cacheable("totalPorAno")
 	public Map<Integer, Integer> totalMatriculadosBrasilPorAno() {
 
 		Map<Integer, Integer> totalPorAno = new LinkedHashMap();
@@ -109,7 +113,8 @@ public class MatriculasService {
 		}
 		return totalPorAno;
 	}
-
+	
+	@Cacheable(value = "totalPorAnoPorModalidade", key = "#modalidade")
 	public Map<Integer, Integer> totalMatriculadosBrasilPorAno(String modalidade) {
 		Map<Integer, Integer> totalPorAno = new LinkedHashMap<>();
 
@@ -145,6 +150,7 @@ public class MatriculasService {
 	    return chaves;
 	}
 	
+	@Cacheable("ranking2022")
 	public Map<String, Integer> listaRanking2022() {
 	    Map<String, Integer> mapCursos = new LinkedHashMap<>();
 
@@ -173,6 +179,7 @@ public class MatriculasService {
 	    return ordenado;
 	}
 
+	@Cacheable(value = "ranking2022Modalidade", key = "#modalidade")
 	public Map<String, Integer> listaRanking2022(String modalidade) {
 	    Map<String, Integer> mapCursos = new LinkedHashMap<>();
 
@@ -208,6 +215,7 @@ public class MatriculasService {
 	
 	//RANKING DE CURSOS EM 2022 ( 10 CURSOS COM MAIOR NUMERO DE MATRICULAS NO BRASIL)
 	//POR ESTADO
+	@Cacheable(value = "ranking2022Estado", key = "#estado")
 	public Map<String, Integer> listaRanking2022PorEstado(String estado) {
 	    Map<String, Integer> mapCursos = new LinkedHashMap<>();
 
@@ -243,6 +251,7 @@ public class MatriculasService {
 	
 	//RANKING DE CURSOS EM 2022 ( 10 CURSOS COM MAIOR NUMERO DE MATRICULAS NO BRASIL)
 	//POR ESTADO E MODALIDADE
+	@Cacheable(value = "ranking2022EstadoModalidade", key = "#estado + '_' + #modalidade")
 		public Map<String, Integer> listaRanking2022PorEstado(String estado,String modalidade) {
 		    Map<String, Integer> mapCursos = new LinkedHashMap<>();
 
@@ -276,7 +285,7 @@ public class MatriculasService {
 		    return ordenado;
 		}
 	
-	
+	@Cacheable(value="totalPorEstado", key = "#estado")
 	public Map<Integer, Integer> totalPorEstado(String estado) {
 		
 		List<Integer> anos = Arrays.asList(2014,2015,2016,2017,2018,2019,2020,2021,2022);
@@ -321,51 +330,6 @@ public class MatriculasService {
 		return totalPorAno;
 	}
 
-	//Total de alunos matriculados (no Brasil) por ano, com a possibilidade de escolher a modalidade (EaD ou Presencial)
-	public Map<Integer, Integer> totalPorEstadoEModalidade(String estado) {
-		
-		List<Integer> anos = Arrays.asList(2014,2015,2016,2017,2018,2019,2020,2021,2022);
-		
-		Map<Integer, Integer> totalPorAno = new LinkedHashMap();
-		
-		for(Matricula m: matriculaRepository.listaMatriculas())
-		{
-			if(m.getEstado().equalsIgnoreCase(estado))
-			{
-				for(Integer ano : anos)
-				{
-					try {
-						Method metodo = Matricula.class.getMethod("getMatriculas"+ano);
-						Integer valor = (Integer) metodo.invoke(m);
-						totalPorAno.put(ano, totalPorAno.getOrDefault(ano, 0) + verificaValor(valor));
-						
-					} catch (NoSuchMethodException e) {
-						
-						e.printStackTrace();
-					} catch (SecurityException e) {
-						
-						e.printStackTrace();
-					} catch (IllegalAccessException e) {
-				
-						e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-					
-						e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						
-						e.printStackTrace();
-					}
-					
-				}
-				
-			}
-			
-		}
-		
-		
-		return totalPorAno;
-	}
-	
 	public List<Integer> gerarAnos()
 	{
 		List<Integer> anos = new LinkedList<Integer>();
@@ -377,6 +341,7 @@ public class MatriculasService {
 		return anos;
 	}
 	
+	@Cacheable(value = "totalPorEstadoModalidade", key = "#estado + '_' + #modalidade")
 	public Map<Integer,Integer> totalPorEstadoModalidade(String estado, String modalidade) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException
 	{
 		
