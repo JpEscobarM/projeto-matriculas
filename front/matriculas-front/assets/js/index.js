@@ -168,7 +168,7 @@ async function buscaTotalPorAno(param1,param2)
     //PARAM1 = MODALIDADE E PARAM2 = ESTADO
     if(param1=== "SEM FILTRO" && param2 ==="SEM FILTRO")
     {
-        console.log("SEM FILTRO ");
+        
         try{
             const response = await fetch('http://localhost:8080/matriculas/total-por-ano');
             const matriculasPorAno= await response.json();
@@ -183,7 +183,7 @@ async function buscaTotalPorAno(param1,param2)
     }
     else if( param1 !== 'SEM FILTRO' && param2 ==="SEM FILTRO")
     {
-        console.log("FILTRO DE MODALIDADE");
+      
         try{    
 
             const response = await fetch(`http://localhost:8080/matriculas/total-por-ano?modalidade=${param1}`);
@@ -199,7 +199,7 @@ async function buscaTotalPorAno(param1,param2)
     }
     else if( param1 === 'SEM FILTRO' && param2 !=="SEM FILTRO")
         {
-            console.log("FILTRO DE ESTADO");
+      
             try{    
     
                 const response = await fetch(`http://localhost:8080/matriculas/total-por-ano?estado=${param2}`);
@@ -215,7 +215,7 @@ async function buscaTotalPorAno(param1,param2)
         }
         else if( param1 !== 'SEM FILTRO' && param2 !=="SEM FILTRO")
             {
-                console.log("FITLRO DE MODALIDADE E ESTADO");
+              
                 try{    
         
                     const response = await fetch(`http://localhost:8080/matriculas/total-por-estado?estado=${param2}&modalidade=${param1}`);
@@ -237,7 +237,7 @@ async function buscaRanking(param1,param2) {
      //PARAM1 = MODALIDADE E PARAM2 = ESTADO
      if(param1=== "SEM FILTRO" && param2 ==="SEM FILTRO")
         {
-            console.log("SEM FILTRO ");
+       
             try{
                 const response = await fetch('http://localhost:8080/matriculas/ranking2022');
                 const matriculasPorAno= await response.json();
@@ -252,7 +252,7 @@ async function buscaRanking(param1,param2) {
         }
         else if( param1 !== 'SEM FILTRO' && param2 ==="SEM FILTRO")
         {
-            console.log("FILTRO DE MODALIDADE");
+          
             try{    
     
                 const response = await fetch(`http://localhost:8080/matriculas/ranking2022?modalidade=${param1}`);
@@ -268,7 +268,7 @@ async function buscaRanking(param1,param2) {
         }
         else if( param1 === 'SEM FILTRO' && param2 !=="SEM FILTRO")
             {
-                console.log("FILTRO DE ESTADO");
+             
                 try{    
         
                     const response = await fetch(`http://localhost:8080/matriculas/ranking2022PorEstado?estado=${param2}`);
@@ -284,7 +284,7 @@ async function buscaRanking(param1,param2) {
             }
             else if( param1 !== 'SEM FILTRO' && param2 !=="SEM FILTRO")
                 {
-                    console.log("FITLRO DE MODALIDADE E ESTADO");
+                    
                     try{    
             
                         const response = await fetch(`http://localhost:8080/matriculas/ranking2022PorEstado?estado=${param2}&modalidade=${param1}`);
@@ -340,7 +340,7 @@ document.addEventListener('click', async function(event)
 {
 
     let elementoClick = event.target;
-    console.log(elementoClick);
+
 
     if(elementoClick.classList.contains('btn-matriculas-por-ano'))
     {
@@ -351,8 +351,7 @@ document.addEventListener('click', async function(event)
     }
     else if(elementoClick.classList.contains("btn-buscar-por-ano"))
     {
-        console.log("Modalidade:", selectModalidade.value);
-        console.log("Estado:", selectEstado.value);
+      
         divResultadoBusca.innerHTML ='';
        const map = await buscaTotalPorAno(selectModalidade.value,selectEstado.value);
       
@@ -370,8 +369,7 @@ document.addEventListener('click', async function(event)
     }
     else if(elementoClick.classList.contains("btn-buscar-ranking"))
     {
-        console.log("Modalidade:", selectModalidade.value);
-        console.log("Estado:", selectEstado.value);
+  
         divResultadoBusca.innerHTML ='';
 
         const map = await buscaRanking(selectModalidade.value,selectEstado.value);
